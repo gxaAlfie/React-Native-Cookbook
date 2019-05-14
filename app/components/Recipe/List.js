@@ -3,8 +3,10 @@ import { StyleSheet, Text, ScrollView, SectionList } from 'react-native'
 import { ListItem } from 'react-native-elements'
 
 export class List extends Component {
-  handleCheckRecipe() {
-    this.props.navigation.navigate('Recipe')
+  handleCheckRecipe(recipeId) {
+    this.props.navigation.navigate('Recipe', {
+      recipeId
+    })
   }
 
   render() {
@@ -12,7 +14,7 @@ export class List extends Component {
       <ScrollView style={ styles.container }>
         <SectionList
           sections={ this.props.displayedRecipeList }
-          renderItem={ ({item}) => <ListItem title={item.name} titleStyle={ styles.listItemTitle } containerStyle={ styles.listItemContainer } rightIcon={{ name: 'chevron-right' }} button onPress={() => { this.handleCheckRecipe() }}/> }
+          renderItem={ ({item}) => <ListItem title={item.name} titleStyle={ styles.listItemTitle } containerStyle={ styles.listItemContainer } rightIcon={{ name: 'chevron-right' }} button onPress={() => { this.handleCheckRecipe(item.id) }}/> }
           renderSectionHeader={({section}) => <Text style={styles.sectionHeader}>{section.title}</Text> }
           keyExtractor={ (item, index) => index }
           >

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, Button } from 'react-native'
+import { StyleSheet, View, Text, Button, ActivityIndicator } from 'react-native'
 import WS from 'react-native-websocket'
 import axios from 'axios'
 
@@ -7,56 +7,21 @@ export default class Recipe extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      text: 'BANANA'
+      description: '',
+      loading: true
     }
   }
 
-  emit = async () => {
-    // AXIOS Sending
-
+  async componentDidMount() {
+    const { navigation } = this.props
+    const recipeId = navigation.getParam('recipeId', 0)
     try {
-      const response = await axios.get('http://localhost:3000/recipes')
-      console.log(response.data.recipes)
-      console.log(this)
-    } catch (error) {
+      const response = await axios.get(`http://localhost:3000/recipes/${recipeId}`)
+      const { description } = response.data.recipe
+      this.setState({ description, loading: false })
+    } catch(error) {
       console.log(error)
     }
-
-      // .then((response) => this.setState({ recipes: response.data.recipes }))
-      // .catch((error) => {
-      //   console.log(error)
-      // })
-      // .finally(() => {
-      //   debugger
-      //   console.log('FINALLY!')
-      // })
-
-    // Fetch API Sending
-    //
-    // fetch('http://localhost:3000/recipes')
-    //   .then(response => response.json())
-    //   .then(
-    //     (data) => {
-    //       console.log(data.recipes)
-    //     }
-    //   )
-    //   .catch((error) => {
-    //     console.log(error)
-    //   })
-
-    // Websocket send message to rails api
-    //
-    // this.ws.send(
-    //   JSON.stringify({
-    //     command: 'message',
-    //     identifier: JSON.stringify({
-    //       channel: 'RecipesChannel'
-    //     }),
-    //     data: JSON.stringify({
-    //       action: 'speak'
-    //     })
-    //   })
-    // )
   }
 
   static navigationOptions = {
@@ -70,38 +35,38 @@ export default class Recipe extends Component {
     },
   }
 
+  renderContent() {
+    const { loading } = this.state
+
+    if (loading) {
+      return(
+        <View style={styles.activityIndicatorContainer}>
+          <ActivityIndicator size='large' color='#ff0000'/>
+        </View>
+      )
+    } else {
+      return (
+        <View>
+          <Text>{this.state.description}</Text>
+        </View>
+      )
+    }
+  }
+
   render() {
     return(
       <View>
-        <WS
-          ref={ref => {this.ws = ref}}
-          url='ws://localhost:3000/cable'
-          onOpen={() => {
-            this.ws.send(
-              JSON.stringify({
-                command: 'subscribe',
-                identifier: JSON.stringify({
-                  channel: 'RecipesChannel'
-                })
-              })
-            )
-          }}
-          onMessage={(e) => {
-            let msg = JSON.parse(e.data)
-            if (msg.type === 'ping' || msg.type === 'confirm_subscription' || msg.type === 'welcome') {
-              return
-            }
-            const parsedData = JSON.parse(e.data)
-            console.log(parsedData.message.message)
-            const recipe_names = parsedData.message.data.map((recipe) => recipe.name)
-            this.setState({text: recipe_names.join(', ')})
-          }}
-          onError={console.log}
-          onClose={console.log}
-          reconnect/>
-        <Button title='Websocket testing' onPress={this.emit}></Button>
-        <Text>{this.state.text}</Text>
+        {this.renderContent()}
       </View>
     )
   }
 }
+
+const styles = StyleSheet.create({
+  activityIndicatorContainer: {
+    flex: 1,
+    padding: 20,
+    alignContent: 'center',
+    justifyContent: 'center'
+  }
+})
