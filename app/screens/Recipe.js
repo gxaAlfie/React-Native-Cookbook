@@ -1,13 +1,12 @@
 import React, { Component } from 'react'
 import { StyleSheet, View, Text, Button, ActivityIndicator } from 'react-native'
-import WS from 'react-native-websocket'
 import axios from 'axios'
 
 export default class Recipe extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      description: '',
+      recipe: {},
       loading: true
     }
   }
@@ -17,8 +16,8 @@ export default class Recipe extends Component {
     const recipeId = navigation.getParam('recipeId', 0)
     try {
       const response = await axios.get(`http://localhost:3000/recipes/${recipeId}`)
-      const { description } = response.data.recipe
-      this.setState({ description, loading: false })
+      const { recipe } = response.data
+      this.setState({ recipe, loading: false })
     } catch(error) {
       console.log(error)
     }
@@ -47,7 +46,7 @@ export default class Recipe extends Component {
     } else {
       return (
         <View>
-          <Text>{this.state.description}</Text>
+          <Text>{this.state.recipe.description}</Text>
         </View>
       )
     }

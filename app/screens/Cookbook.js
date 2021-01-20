@@ -14,6 +14,7 @@ export default class Cookbook extends Component {
     headerTitleStyle: {
       fontWeight: 'bold',
     },
+    headerBackTitle: null
   }
 
   constructor(props) {
